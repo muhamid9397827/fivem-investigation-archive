@@ -24,6 +24,7 @@ create table public.people (
   department text,
   status public.person_status not null default 'active',
   notes text,
+  pin_hash text not null default '',
   avatar_url text,
   created_by uuid references public.profiles(id),
   created_at timestamptz not null default now(),
@@ -36,12 +37,17 @@ create table public.cases (
   case_number text not null unique,
   title text not null,
   summary text not null,
+  allegations text,
+  statements text,
+  procedures text,
+  findings text,
+  decision text,
+  recommendations text,
   status public.case_status not null default 'open',
   priority public.case_priority not null default 'medium',
   investigator text not null,
   incident_date timestamptz,
   opened_at timestamptz not null default now(),
-  decision text,
   created_by uuid references public.profiles(id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -57,7 +63,8 @@ create table public.evidence (
   mime_type text,
   file_size bigint,
   created_by uuid references public.profiles(id),
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
 );
 
 create table public.audit_logs (
@@ -94,6 +101,9 @@ create trigger people_touch_updated_at before update on public.people
 for each row execute function public.touch_updated_at();
 
 create trigger cases_touch_updated_at before update on public.cases
+for each row execute function public.touch_updated_at();
+
+create trigger evidence_touch_updated_at before update on public.evidence
 for each row execute function public.touch_updated_at();
 
 alter table public.profiles enable row level security;
@@ -148,8 +158,8 @@ values (
   'case-evidence',
   'case-evidence',
   false,
-  524288000,
-  array['image/jpeg','image/png','image/webp','image/gif','video/mp4','video/webm','application/pdf','text/plain','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+  78643200,
+  array['image/jpeg','image/png','image/webp','image/gif','video/mp4','video/webm','video/quicktime','video/x-matroska','application/pdf','text/plain','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document']
 )
 on conflict (id) do nothing;
 
