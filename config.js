@@ -1,10 +1,9 @@
 window.APP_CONFIG = {
-  // اتركها true لتشغيل نسخة محلية كاملة داخل المتصفح.
-  demoMode: true,
+  // النسخة الحقيقية المتصلة بقاعدة Supabase.
+  demoMode: false,
 
-  // عند ربط Supabase غيّر demoMode إلى false ثم أضف القيمتين.
-  supabaseUrl: '',
-  supabaseAnonKey: '',
+  supabaseUrl: 'https://sxtbgnjbrcsmgsdhkbno.supabase.co',
+  supabaseAnonKey: 'sb_publishable_uLwQd-hG2uJ7DpHydUL7EQ_ZfIXkkte',
 
   // إعدادات المشاركة الآمنة. اترك sharePageUrl فارغًا لاستخدام share.html على نفس النطاق.
   caseShareFunctionName: 'case-share',
