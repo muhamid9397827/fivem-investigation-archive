@@ -34,8 +34,8 @@ jobs:
           }
           const css = (window.__STYLE_SOURCE_PARTS || []).join('')
           const app = (window.__APP_SOURCE_PARTS || []).join('')
-          if (css.length < 1000) throw new Error('CSS bundle is incomplete')
-          if (app.length < 1000) throw new Error('Application bundle is incomplete')
+          if (css.length < 10000) throw new Error('CSS bundle is incomplete')
+          if (app.length < 20000) throw new Error('Application bundle is incomplete')
           fs.writeFileSync('/tmp/fivem-archive-app.js', app)
           console.log(`Validated ${files.length} bundle parts, ${app.length} JS chars, ${css.length} CSS chars`)
           NODE
