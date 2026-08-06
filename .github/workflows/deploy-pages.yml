@@ -1,4 +1,4 @@
-name: Deploy static site to GitHub Pages
+name: Validate and deploy static site
 
 on:
   push:
@@ -15,7 +15,34 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate split bundles
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('fs')
+          const vm = require('vm')
+          const html = fs.readFileSync('index.html', 'utf8')
+          const files = [...html.matchAll(/<script src="(webparts\/(?:style|app)-[^"]+\.js)"><\/script>/g)].map((match) => match[1])
+          global.window = {}
+          for (const file of files) {
+            if (!fs.existsSync(file)) throw new Error(`Missing bundle part: ${file}`)
+            vm.runInThisContext(fs.readFileSync(file, 'utf8'), { filename: file })
+          }
+          const css = (window.__STYLE_SOURCE_PARTS || []).join('')
+          const app = (window.__APP_SOURCE_PARTS || []).join('')
+          if (css.length < 1000) throw new Error('CSS bundle is incomplete')
+          if (app.length < 1000) throw new Error('Application bundle is incomplete')
+          fs.writeFileSync('/tmp/fivem-archive-app.js', app)
+          console.log(`Validated ${files.length} bundle parts, ${app.length} JS chars, ${css.length} CSS chars`)
+          NODE
+          node --check /tmp/fivem-archive-app.js
+
   deploy:
+    needs: validate
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
