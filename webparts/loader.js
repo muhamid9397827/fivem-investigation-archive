@@ -1,4 +1,4 @@
-(() => {
+(async () => {
   'use strict'
 
   const app = document.getElementById('app')
@@ -25,11 +25,40 @@
   window.addEventListener('error', (event) => showFailure(event.error || event.message))
   window.addEventListener('unhandledrejection', (event) => showFailure(event.reason))
 
+  async function recoverSixthPart() {
+    const response = await fetch(`webparts/app-v2-06.js?repair=${Date.now()}`, { cache: 'no-store' })
+    if (!response.ok) throw new Error(`تعذر جلب الجزء السادس (${response.status})`)
+
+    const raw = await response.text()
+    const marker = 'window.__APP_SOURCE_PARTS=window.__APP_SOURCE_PARTS||[];window.__APP_SOURCE_PARTS.push("'
+    const startIndex = raw.indexOf(marker)
+    if (startIndex < 0) throw new Error('تعذر تحديد بداية الجزء السادس')
+
+    const contentStart = startIndex + marker.length
+    const firstLineEnd = raw.indexOf('\n', contentStart)
+    const wrapperEnd = raw.lastIndexOf('\n");')
+    if (firstLineEnd < 0 || wrapperEnd <= firstLineEnd) throw new Error('تعذر تحليل الجزء السادس')
+
+    const escapedHead = raw.slice(contentStart, firstLineEnd)
+    let decodedHead
+    try {
+      decodedHead = JSON.parse(`"${escapedHead}"`)
+    } catch (error) {
+      throw new Error(`تعذر فك بداية الجزء السادس: ${error.message}`)
+    }
+
+    const rawTail = raw.slice(firstLineEnd + 1, wrapperEnd)
+    const recovered = `${decodedHead}\n${rawTail}`
+    if (recovered.length < 5000) throw new Error('الجزء السادس المستعاد ناقص')
+    window.__APP_SOURCE_PARTS.push(recovered)
+  }
+
   try {
     const styleParts = window.__STYLE_SOURCE_PARTS || []
     const appParts = window.__APP_SOURCE_PARTS || []
 
     if (styleParts.length !== 3) throw new Error(`لم تُحمّل جميع ملفات التصميم (${styleParts.length}/3)`)
+    if (appParts.length === 5) await recoverSixthPart()
     if (appParts.length !== 6) throw new Error(`لم تُحمّل جميع ملفات التطبيق (${appParts.length}/6)`)
 
     const style = document.createElement('style')
