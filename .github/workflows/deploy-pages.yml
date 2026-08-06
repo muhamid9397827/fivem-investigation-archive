@@ -25,8 +25,9 @@ jobs:
       - uses: actions/configure-pages@v5
       - name: Prepare static site
         run: |
-          mkdir _site
-          cp index.html styles.css app.js config.js .nojekyll _site/
+          mkdir -p _site
+          cp index.html config.js .nojekyll _site/
+          cp -R webparts _site/webparts
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
