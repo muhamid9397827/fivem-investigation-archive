@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>تشخيص الأرشيف القيادي</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0b111b;--card:#121a27;--line:#283449;--text:#eef3fa;--muted:#9ba9bc;--ok:#2ecc71;--warn:#f5b942;--bad:#ef5b5b;--gold:#c7953d}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top right,#182235 0,#0b111b 45%);color:var(--text);font-family:Tahoma,Arial,sans-serif;min-height:100vh}
+    main{width:min(920px,calc(100% - 28px));margin:32px auto 60px}.head,.panel{background:rgba(18,26,39,.94);border:1px solid var(--line);border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.22)}
+    .head{padding:24px}.head-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.eyebrow{color:var(--gold);font-size:12px;font-weight:700}.head h1{font-size:25px;margin:8px 0}.head p{margin:0;color:var(--muted);font-size:13px;line-height:1.9}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:20px}
+    button,a.btn{border:1px solid var(--line);background:#172236;color:var(--text);min-height:42px;padding:0 16px;border-radius:11px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}button.primary{background:var(--gold);color:#17120a;border-color:var(--gold)}button:disabled{opacity:.55;cursor:wait}
+    .privacy{margin-top:14px;padding:11px 13px;border:1px solid #3b4657;border-radius:11px;color:var(--muted);font-size:11px;line-height:1.8;background:#0e1622}
+    .panel{margin-top:16px;padding:18px}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}.metric{padding:14px;border:1px solid var(--line);border-radius:13px;background:#0e1622}.metric span,.metric strong{display:block}.metric span{font-size:10px;color:var(--muted)}.metric strong{font-size:21px;margin-top:5px}.metric.ok strong{color:var(--ok)}.metric.warn strong{color:var(--warn)}.metric.bad strong{color:var(--bad)}
+    #results{display:grid;gap:9px}.row{display:grid;grid-template-columns:34px 1fr auto;gap:11px;align-items:center;padding:13px;border:1px solid var(--line);border-radius:13px;background:#0e1622}.icon{width:31px;height:31px;border-radius:10px;display:grid;place-items:center;font-weight:900}.row.ok .icon{background:rgba(46,204,113,.15);color:var(--ok)}.row.warn .icon{background:rgba(245,185,66,.15);color:var(--warn)}.row.bad .icon{background:rgba(239,91,91,.15);color:var(--bad)}.row.wait .icon{background:#1b2638;color:var(--muted)}.row h3{font-size:13px;margin:0 0 4px}.row p{font-size:11px;line-height:1.7;color:var(--muted);margin:0;word-break:break-word}.tag{font-size:10px;border:1px solid var(--line);border-radius:999px;padding:5px 9px;white-space:nowrap}.row.ok .tag{color:var(--ok)}.row.warn .tag{color:var(--warn)}.row.bad .tag{color:var(--bad)}
+    .foot{font-size:10px;color:var(--muted);text-align:center;margin-top:16px;line-height:1.8}.hidden{display:none}
+    @media(max-width:650px){main{margin-top:14px}.head-top{display:block}.summary{grid-template-columns:1fr}.row{grid-template-columns:31px 1fr}.tag{grid-column:2;justify-self:start}.actions>*{width:100%}}
+  </style>
+</head>
+<body>
+<main>
+  <section class="head">
+    <div class="head-top">
+      <div>
+        <div class="eyebrow">أداة فحص داخلية</div>
+        <h1>تشخيص اتصال الأرشيف</h1>
+        <p>تفحص إعدادات الموقع وخدمة الدخول والجداول والتخزين ودالة مشاركة القضايا، من دون تعديل أو حذف أي بيانات.</p>
+      </div>
+      <a class="btn" href="./">العودة إلى الموقع</a>
+    </div>
+    <div class="actions">
+      <button id="run" class="primary">بدء الفحص</button>
+      <button id="copy">نسخ النتيجة</button>
+    </div>
+    <div class="privacy">هذه الصفحة لا تطلب كلمة المرور ولا تعرض المفتاح كاملًا، ولا ترسل نتائج الفحص إلى أي جهة أخرى. تستخدم فقط المفتاح العام الموجود أصلًا في <code>config.js</code>.</div>
+  </section>
+
+  <section class="panel">
+    <div class="summary">
+      <div class="metric ok"><span>ناجح</span><strong id="okCount">0</strong></div>
+      <div class="metric warn"><span>تنبيه</span><strong id="warnCount">0</strong></div>
+      <div class="metric bad"><span>مشكلة</span><strong id="badCount">0</strong></div>
+    </div>
+    <div id="results"><div class="row wait"><div class="icon">…</div><div><h3>جاهز للفحص</h3><p>اضغط «بدء الفحص» لعرض النتيجة.</p></div><span class="tag">انتظار</span></div></div>
+  </section>
+  <div class="foot">لا تعتبر هذه الصفحة بديلًا عن سجلات Supabase، لكنها تحدد بسرعة إن كان الخلل في الإعدادات أو الاتصال أو الصلاحيات أو النشر.</div>
+</main>
+<script src="config.js?v=diagnostics-1"></script>
+<script>
+(() => {
+  'use strict'
+  const runButton = document.getElementById('run')
+  const copyButton = document.getElementById('copy')
+  const results = document.getElementById('results')
+  const counts = { ok: 0, warn: 0, bad: 0 }
+  const reportLines = []
+
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]))
+  }
+
+  function reset() {
+    counts.ok = counts.warn = counts.bad = 0
+    reportLines.length = 0
+    results.innerHTML = ''
+    updateCounts()
+  }
+
+  function updateCounts() {
+    document.getElementById('okCount').textContent = counts.ok
+    document.getElementById('warnCount').textContent = counts.warn
+    document.getElementById('badCount').textContent = counts.bad
+  }
+
+  function addResult(type, title, detail, label) {
+    counts[type]++
+    updateCounts()
+    const symbols = { ok: '✓', warn: '!', bad: '×' }
+    const row = document.createElement('div')
+    row.className = `row ${type}`
+    row.innerHTML = `<div class="icon">${symbols[type]}</div><div><h3>${escapeHtml(title)}</h3><p>${escapeHtml(detail)}</p></div><span class="tag">${escapeHtml(label || ({ok:'سليم',warn:'تنبيه',bad:'مشكلة'}[type]))}</span>`
+    results.appendChild(row)
+    reportLines.push(`[${type.toUpperCase()}] ${title}: ${detail}`)
+  }
+
+  async function fetchWithTimeout(url, options = {}, timeout = 12000) {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), timeout)
+    try {
+      return await fetch(url, { ...options, signal: controller.signal, cache: 'no-store' })
+    } finally {
+      clearTimeout(timer)
+    }
+  }
+
+  async function responseText(response) {
+    try { return await response.text() } catch { return '' }
+  }
+
+  function projectRef(url) {
+    try { return new URL(url).hostname.split('.')[0] } catch { return '' }
+  }
+
+  function readStoredSession(ref) {
+    const candidates = [`sb-${ref}-auth-token`]
+    for (let index = 0; index < localStorage.length; index++) {
+      const key = localStorage.key(index)
+      if (key && key.startsWith('sb-') && key.includes('auth-token') && !candidates.includes(key)) candidates.push(key)
+    }
+    for (const key of candidates) {
+      try {
+        const raw = localStorage.getItem(key)
+        if (!raw) continue
+        const parsed = JSON.parse(raw)
+        const session = parsed?.currentSession || parsed?.session || parsed
+        if (session?.access_token) return session
+      } catch {}
+    }
+    return null
+  }
+
+  function apiHeaders(key, token, json = false) {
+    const headers = { apikey: key, Authorization: `Bearer ${token || key}` }
+    if (json) headers['Content-Type'] = 'application/json'
+    return headers
+  }
+
+  async function checkTable(base, key, token, table) {
+    try {
+      const response = await fetchWithTimeout(`${base}/rest/v1/${table}?select=*&limit=1`, { headers: apiHeaders(key, token) })
+      const body = await responseText(response)
+      if (response.ok) {
+        addResult('ok', `جدول ${table}`, token ? 'الجدول موجود ويمكن الوصول إليه بالجلسة الحالية.' : 'الجدول موجود؛ عدم ظهور سجلات للزائر أمر طبيعي بسبب الحماية.', `HTTP ${response.status}`)
+      } else if ([401,403].includes(response.status)) {
+        addResult('warn', `جدول ${table}`, 'الجدول موجود على الأرجح، لكن الوصول إليه يحتاج تسجيل دخول أو صلاحية أعلى.', `HTTP ${response.status}`)
+      } else if (response.status === 404 || /PGRST205|schema cache|Could not find/i.test(body)) {
+        addResult('bad', `جدول ${table}`, 'الجدول غير موجود أو لم يدخل بعد في ذاكرة مخطط Supabase.', `HTTP ${response.status}`)
+      } else {
+        addResult('bad', `جدول ${table}`, `استجابة غير متوقعة: ${body.slice(0,180) || 'لا توجد تفاصيل'}`, `HTTP ${response.status}`)
+      }
+    } catch (error) {
+      addResult('bad', `جدول ${table}`, error.name === 'AbortError' ? 'انتهت مهلة الاتصال.' : `تعذر الاتصال: ${error.message}`, 'اتصال')
+    }
+  }
+
+  async function runDiagnostics() {
+    reset()
+    runButton.disabled = true
+    runButton.textContent = 'جارٍ الفحص…'
+    const config = window.APP_CONFIG || {}
+    const base = String(config.supabaseUrl || '').replace(/\/$/, '')
+    const key = String(config.supabaseAnonKey || '')
+    const ref = projectRef(base)
+
+    if (!base || !/^https:\/\/.+\.supabase\.co$/.test(base)) addResult('bad', 'رابط Supabase', 'رابط المشروع مفقود أو غير صالح في config.js.', 'إعدادات')
+    else addResult('ok', 'رابط Supabase', `${base} — صيغة الرابط صحيحة.`, 'إعدادات')
+
+    if (!key || !(key.startsWith('sb_publishable_') || key.startsWith('eyJ'))) addResult('bad', 'المفتاح العام', 'المفتاح العام مفقود أو لا يشبه Publishable/Anon Key.', 'إعدادات')
+    else addResult('ok', 'المفتاح العام', `${key.slice(0,14)}…${key.slice(-5)} — موجود ولم يُعرض كاملًا.`, 'إعدادات')
+
+    if (config.demoMode === false) addResult('ok', 'وضع التشغيل', 'الموقع مضبوط على وضع الإنتاج وليس الوضع التجريبي.', 'إنتاج')
+    else addResult('bad', 'وضع التشغيل', 'demoMode ليس false، لذلك الموقع ما زال تجريبيًا.', 'تجريبي')
+
+    if (!base || !key) {
+      runButton.disabled = false
+      runButton.textContent = 'إعادة الفحص'
+      return
+    }
+
+    try {
+      const response = await fetchWithTimeout(`${base}/auth/v1/health`, { headers: { apikey: key } })
+      response.ok ? addResult('ok', 'خدمة تسجيل الدخول', 'Supabase Auth متاحة وتستجيب.', `HTTP ${response.status}`) : addResult('bad', 'خدمة تسجيل الدخول', `الخدمة ردت بالحالة ${response.status}.`, `HTTP ${response.status}`)
+    } catch (error) {
+      addResult('bad', 'خدمة تسجيل الدخول', error.name === 'AbortError' ? 'انتهت مهلة الاتصال.' : error.message, 'اتصال')
+    }
+
+    const session = readStoredSession(ref)
+    let accessToken = ''
+    let userId = ''
+    if (session?.access_token) {
+      try {
+        const response = await fetchWithTimeout(`${base}/auth/v1/user`, { headers: apiHeaders(key, session.access_token) })
+        const body = await response.json().catch(() => ({}))
+        if (response.ok && body.id) {
+          accessToken = session.access_token
+          userId = body.id
+          addResult('ok', 'جلسة المدير', 'توجد جلسة دخول صالحة في هذا المتصفح.', 'مسجّل')
+        } else addResult('warn', 'جلسة المدير', 'وجدت جلسة محفوظة لكنها منتهية أو غير صالحة. سجّل الدخول من الصفحة الرئيسية.', `HTTP ${response.status}`)
+      } catch (error) {
+        addResult('warn', 'جلسة المدير', `تعذر التحقق من الجلسة: ${error.message}`, 'جلسة')
+      }
+    } else {
+      addResult('warn', 'جلسة المدير', 'لا توجد جلسة دخول في هذا المتصفح. الفحص العام سيستمر، لكن اختبار صلاحية المدير سيكون محدودًا.', 'غير مسجّل')
+    }
+
+    for (const table of ['profiles','people','cases','evidence','case_shares']) await checkTable(base, key, accessToken, table)
+
+    if (accessToken && userId) {
+      try {
+        const response = await fetchWithTimeout(`${base}/rest/v1/profiles?id=eq.${encodeURIComponent(userId)}&select=full_name,role`, { headers: apiHeaders(key, accessToken) })
+        const data = await response.json().catch(() => [])
+        if (response.ok && Array.isArray(data) && data[0]) addResult(data[0].role === 'admin' ? 'ok' : 'warn', 'صلاحية الحساب', `الحساب مرتبط بملف صلاحيات ودوره: ${data[0].role}.`, data[0].role)
+        else addResult('bad', 'صلاحية الحساب', 'لم أجد سجل الحساب داخل جدول profiles أو منعته السياسات.', `HTTP ${response.status}`)
+      } catch (error) { addResult('bad', 'صلاحية الحساب', error.message, 'اتصال') }
+    }
+
+    try {
+      const response = await fetchWithTimeout(`${base}/storage/v1/object/list/case-evidence`, {
+        method: 'POST', headers: apiHeaders(key, accessToken, true), body: JSON.stringify({ prefix: '', limit: 1, offset: 0 })
+      })
+      const body = await responseText(response)
+      if (response.ok) addResult('ok', 'تخزين المرفقات', 'حاوية case-evidence موجودة وخدمة التخزين تستجيب.', `HTTP ${response.status}`)
+      else if ([401,403].includes(response.status)) addResult('warn', 'تخزين المرفقات', 'خدمة التخزين متاحة، لكن الفحص يحتاج جلسة دخول وصلاحية.', `HTTP ${response.status}`)
+      else if (response.status === 404 || /Bucket not found/i.test(body)) addResult('bad', 'تخزين المرفقات', 'حاوية case-evidence غير موجودة.', `HTTP ${response.status}`)
+      else addResult('bad', 'تخزين المرفقات', body.slice(0,180) || 'استجابة غير معروفة.', `HTTP ${response.status}`)
+    } catch (error) { addResult('bad', 'تخزين المرفقات', error.message, 'اتصال') }
+
+    try {
+      const functionName = config.caseShareFunctionName || 'case-share'
+      const response = await fetchWithTimeout(`${base}/functions/v1/${encodeURIComponent(functionName)}`, {
+        method: 'POST', headers: apiHeaders(key, accessToken, true), body: JSON.stringify({ action: 'diagnostic' })
+      })
+      const body = await responseText(response)
+      if (response.status === 404 && !/العملية المطلوبة غير معروفة/.test(body)) addResult('bad', 'دالة مشاركة القضايا', `الدالة ${functionName} غير منشورة أو المسار غير موجود.`, 'غير منشورة')
+      else if (response.status === 500 && /إعدادات الخادم غير مكتملة/.test(body)) addResult('bad', 'دالة مشاركة القضايا', 'الدالة منشورة لكن متغيرات الخادم غير مكتملة.', 'إعدادات')
+      else if ([200,400,401,403,405].includes(response.status) || /العملية المطلوبة غير معروفة|يجب تسجيل الدخول|ليس لديك صلاحية/.test(body)) addResult('ok', 'دالة مشاركة القضايا', `الدالة ${functionName} منشورة وتستجيب.`, `HTTP ${response.status}`)
+      else addResult('warn', 'دالة مشاركة القضايا', `وصلت استجابة غير محسومة: ${body.slice(0,180) || response.status}`, `HTTP ${response.status}`)
+    } catch (error) { addResult('bad', 'دالة مشاركة القضايا', error.message, 'اتصال') }
+
+    const overall = counts.bad ? 'يوجد خلل يحتاج معالجة.' : counts.warn ? 'الاتصال الأساسي يعمل مع وجود تنبيهات.' : 'جميع الاختبارات الأساسية ناجحة.'
+    reportLines.unshift(`النتيجة العامة: ${overall}`)
+    runButton.disabled = false
+    runButton.textContent = 'إعادة الفحص'
+  }
+
+  copyButton.addEventListener('click', async () => {
+    const text = reportLines.length ? reportLines.join('\n') : 'لم يتم تشغيل الفحص بعد.'
+    try { await navigator.clipboard.writeText(text); copyButton.textContent = 'تم النسخ'; setTimeout(() => copyButton.textContent = 'نسخ النتيجة', 1400) }
+    catch { alert(text) }
+  })
+  runButton.addEventListener('click', runDiagnostics)
+  runDiagnostics()
+})()
+</script>
+</body>
+</html>
