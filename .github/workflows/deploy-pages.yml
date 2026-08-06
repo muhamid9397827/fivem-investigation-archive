@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate split bundles
+      - name: Validate application files
         shell: bash
         run: |
           node <<'NODE'
@@ -37,9 +37,13 @@ jobs:
           if (css.length < 10000) throw new Error('CSS bundle is incomplete')
           if (app.length < 20000) throw new Error('Application bundle is incomplete')
           fs.writeFileSync('/tmp/fivem-archive-app.js', app)
-          console.log(`Validated ${files.length} bundle parts, ${app.length} JS chars, ${css.length} CSS chars`)
           NODE
           node --check /tmp/fivem-archive-app.js
+          node --check share-admin.js
+          node --check share.js
+          test -s share.html
+          test -s share.css
+          test -s supabase/functions/case-share/index.ts
 
   deploy:
     needs: validate
@@ -53,7 +57,7 @@ jobs:
       - name: Prepare static site
         run: |
           mkdir -p _site
-          cp index.html config.js .nojekyll _site/
+          cp index.html share-admin.js share.html share.js share.css config.js .nojekyll _site/
           cp -R webparts _site/webparts
       - uses: actions/upload-pages-artifact@v3
         with:
