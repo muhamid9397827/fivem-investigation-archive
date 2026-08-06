@@ -98,16 +98,17 @@
     document.getElementById('secureShareCancel').addEventListener('click', close)
     modal.addEventListener('click', (event) => { if (event.target === modal) close() })
 
-    document.querySelectorAll('[data-secure-share-revoke]').forEach((button) => button.addEventListener('click', async () => {
+    document.getElementById('secureShareRows').addEventListener('click', async (event) => {
+      const button = event.target.closest('[data-secure-share-revoke]')
+      if (!button) return
       if (!confirm('سيُلغى الرابط فورًا ولن يستطيع أي شخص فتحه بعد ذلك. هل أنت متأكد؟')) return
       button.disabled = true
       try {
         await callShare('revoke', { share_id: button.dataset.secureShareRevoke })
         const list = (await callShare('list', { case_id: caseId })).shares || []
         document.getElementById('secureShareRows').innerHTML = rowsMarkup(list)
-        scheduleInstall()
       } catch (error) { alert(error.message); button.disabled = false }
-    }))
+    })
 
     document.getElementById('secureShareForm').addEventListener('submit', async (event) => {
       event.preventDefault()
@@ -134,6 +135,8 @@
           try { await navigator.clipboard.writeText(input.value) } catch { input.select(); document.execCommand('copy') }
           document.getElementById('secureShareCopy').textContent = 'تم النسخ ✓'
         })
+        const list = (await callShare('list', { case_id: caseId })).shares || []
+        document.getElementById('secureShareRows').innerHTML = rowsMarkup(list)
         button.classList.add('hidden')
         document.getElementById('secureShareCancel').textContent = 'إغلاق'
       } catch (error) { document.getElementById('secureShareError').innerHTML = `<div class="notice danger">${esc(error.message)}</div>` }
